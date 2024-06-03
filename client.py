@@ -2,18 +2,28 @@ from flask import Flask, render_template, jsonify, request
 import threading
 import requests
 import time
+import os
 import numpy as np
 from dependencies.parse_config_file import parseConfigFile
 
 app = Flask(__name__)
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Global variables to control the start/stop of API calls and to store the API URL and data
 fetching = False
 api_thread = None
 api_url = ''
 latest_data = {}
+cf = {}
 
-cf = parseConfigFile("config_files/spot_3.cfg", Rx_Ant=4, Tx_Ant=2)
+radar_type = 1642
+
+if radar_type == 1642:
+    cf = parseConfigFile("config_files/AWR1642.cfg", Rx_Ant=4, Tx_Ant=2)
+elif radar_type == 2944:
+    cf = parseConfigFile("config_files/AWR2944.cfg", Rx_Ant=4, Tx_Ant=2)
+
+
 rangeArray = np.array(range(cf["numRangeBins"])) * cf["rangeIdxToMeters"]
 
 
