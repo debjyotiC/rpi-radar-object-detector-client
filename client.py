@@ -14,7 +14,6 @@ fetching = False
 api_thread = None
 api_url = ''
 latest_data = {}
-cf = {}
 
 radar_type = 1642
 
