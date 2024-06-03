@@ -3,7 +3,7 @@ import threading
 import requests
 import time
 import numpy as np
-from parse_config_file import parseConfigFile
+from dependencies.parse_config_file import parseConfigFile
 
 app = Flask(__name__)
 
