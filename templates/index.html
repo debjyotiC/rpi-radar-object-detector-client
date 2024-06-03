@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obstacle Detector</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.data-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.plot-container {
+    flex: 1;
+    width: 60%; /* Adjust the width as needed */
+    margin-right: 20px;
+}
+
+.info-container {
+    flex: 1;
+    width: 40%; /* Adjust the width as needed */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Obstacle Detector</h1>
+        <div class="input-field">
+            <input type="text" id="local-ip" class="validate" placeholder="Enter local IP">
+            <label for="local-ip" class="active">Local IP</label>
+        </div>
+        <div class="input-field">
+            <button id="start-button" class="btn waves-effect waves-light" type="button">Start</button>
+            <button id="stop-button" class="btn waves-effect waves-light red" type="button">Stop</button>
+        </div>
+
+        <div class="status-flag">
+            <span id="status-flag" class="flag"></span>
+        </div>
+
+        <div class="data-container">
+            <div id="plot" class="plot-container"></div>
+            <div class="info-container">
+                <div class="input-field">
+                    <input type="text" id="occupancy-type" readonly>
+                    <label for="occupancy-type" class="active">Occupancy Type</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="detection-flag" readonly>
+                    <label for="detection-flag" class="active">Detection Flag</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="threshold" readonly>
+                    <label for="threshold" class="active">Threshold</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="sum" readonly>
+                    <label for="sum" class="active">Overall Sum</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            let fetchInterval;
+
+            $('#start-button').click(function(){
+                const localIp = $('#local-ip').val();
+                const apiUrl = `http://${localIp}/robot-data`;
+                $.ajax({
+                    type: 'POST',
+                    url: '/start',
+                    contentType: 'application/json',
+                    data: JSON.stringify({api_url: apiUrl}),
+                    success: function(data){
+                        console.log(data);
+                        fetchInterval = setInterval(fetchLatestData, 2000); // Fetch data every 2 seconds
+                    }
+                });
+            });
+
+            $('#stop-button').click(function(){
+                $.post('/stop', function(data){
+                    clearInterval(fetchInterval);
+                });
+            });
+
+            function fetchLatestData() {
+                $.get('/latest-data', function(data){
+                    if (data.Scene_Image, data.Range_Array) {
+                        displayImage(data.Scene_Image, data.Range_Array);
+                    }
+                    console.log(data.Range_Array)
+                    $('#occupancy-type').val(data.Obj_Detected);
+                    $('#detection-flag').val(data.Obj_detection_flag);
+                    $('#threshold').val(data.Threshold);
+                    $('#sum').val(data.Sum);
+
+                    // Update the flag based on occupancy type
+                    if (data.Obj_Detected === "path not clear") {
+                        $('#status-flag').removeClass('green').addClass('red');
+                    } else {
+                        $('#status-flag').removeClass('red').addClass('green');
+                    }
+                });
+            }
+
+            function displayImage(matrix, range_array) {
+                const data = [{
+                    x: range_array,
+                    z: matrix,
+                    type: 'heatmap',
+                    colorscale: 'Viridis'
+                }];
+
+                const layout = {
+                    title: 'Scene Image',
+                    xaxis: { title: 'Range (m)' },
+                    yaxis: { title: 'Time (s)', autorange: 'reversed' },
+                    margin: { t: 40, l: 40, r: 40, b: 40 }
+                };
+
+                Plotly.newPlot('plot', data, layout);
+            }
+        });
+    </script>
+</body>
+</html>
