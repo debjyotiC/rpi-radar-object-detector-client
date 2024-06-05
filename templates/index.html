@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obstacle Detector</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="static/css/materialize.min.css">
+    <link rel="stylesheet" href="static/css/material-icons.css">
+    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="static/js/plotly-latest.min.js"></script>
     <style>
         .container {
             width: 100%;
@@ -25,18 +25,44 @@
 
         .plot-container {
             flex: 1;
-            width: 60%; /* Adjust the width as needed */
+            width: 60%;
             margin-right: 20px;
         }
 
         .info-container {
             flex: 1;
-            width: 40%; /* Adjust the width as needed */
+            width: 40%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
+        .status-flag {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .flag {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: gray;
+        }
+
+        .flag.green {
+            background-color: #008000;
+        }
+
+        .flag.red {
+            background-color: #FF0000;
+        }
+
+        #path-clearance {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -59,20 +85,12 @@
             <div id="plot" class="plot-container"></div>
             <div class="info-container">
                 <div class="input-field">
-                    <input type="text" id="occupancy-type" readonly>
-                    <label for="occupancy-type" class="active">Occupancy Type</label>
+                    <input type="text" id="path-clearance" readonly>
+                    <label for="path-clearance" class="active">Path Clearance</label>
                 </div>
                 <div class="input-field">
                     <input type="text" id="detection-flag" readonly>
                     <label for="detection-flag" class="active">Detection Flag</label>
-                </div>
-                <div class="input-field">
-                    <input type="text" id="threshold" readonly>
-                    <label for="threshold" class="active">Threshold</label>
-                </div>
-                <div class="input-field">
-                    <input type="text" id="sum" readonly>
-                    <label for="sum" class="active">Overall Sum</label>
                 </div>
             </div>
         </div>
@@ -92,7 +110,7 @@
                     data: JSON.stringify({api_url: apiUrl}),
                     success: function(data){
                         console.log(data);
-                        fetchInterval = setInterval(fetchLatestData, 2000); // Fetch data every 2 seconds
+                        fetchInterval = setInterval(fetchLatestData, 2000);
                     }
                 });
             });
@@ -105,37 +123,65 @@
 
             function fetchLatestData() {
                 $.get('/latest-data', function(data){
-                    if (data.Scene_Image, data.Range_Array) {
-                        displayImage(data.Scene_Image, data.Range_Array);
+                    if (data.Scene_Image && data.Range_Array) {
+                        displayImage(data.Scene_Image, data.Range_Array, data.Obj_Detected);
                     }
-                    console.log(data.Range_Array)
-                    $('#occupancy-type').val(data.Obj_Detected);
+                    console.log(data.Range_Array);
+                    const pathClearance = data.Obj_Detected === "path not clear" ? "No" : "Yes";
+                    $('#path-clearance').val(pathClearance);
                     $('#detection-flag').val(data.Obj_detection_flag);
-                    $('#threshold').val(data.Threshold);
-                    $('#sum').val(data.Sum);
 
-                    // Update the flag based on occupancy type
                     if (data.Obj_Detected === "path not clear") {
                         $('#status-flag').removeClass('green').addClass('red');
+                        $('#path-clearance').css('color', '#FF0000');
                     } else {
                         $('#status-flag').removeClass('red').addClass('green');
+                        $('#path-clearance').css('color', '#008000');
                     }
                 });
             }
 
-            function displayImage(matrix, range_array) {
+            function displayImage(matrix, range_array, detectionStatus) {
+                if (detectionStatus === "path not clear") {
+                    colorscale = [
+                        ["0.0", "#440000"],
+                        ["0.301029995663981", "#550000"],
+                        ["0.477121254719662", "#660000"],
+                        ["0.602059991327962", "#880000"],
+                        ["0.698970004336018", "#A00000"],
+                        ["0.778151250383643", "#BB0000"],
+                        ["0.845098040014256", "#CF0000"],
+                        ["0.903089986991943", "#EF0000"],
+                        ["0.954242509439324", "#FF0000"],
+                        ["1.0", "#FFF000"],
+                    ];
+                } else {
+                    colorscale = [
+                        ["0.0", "#004400"],
+                        ["0.301029995663981", "#005500"],
+                        ["0.477121254719662", "#006600"],
+                        ["0.602059991327962", "#008800"],
+                        ["0.698970004336018", "#00A000"],
+                        ["0.778151250383643", "#00BB00"],
+                        ["0.845098040014256", "#00CF00"],
+                        ["0.903089986991943", "#00EF00"],
+                        ["0.954242509439324", "#00FF00"],
+                        ["1.0", "#F0FF00"],
+                    ];
+                }
+
                 const data = [{
                     x: range_array,
                     z: matrix,
                     type: 'heatmap',
-                    colorscale: 'Viridis'
+                    colorscale: colorscale
                 }];
 
                 const layout = {
                     title: 'Scene Image',
                     xaxis: { title: 'Range (m)' },
                     yaxis: { title: 'Time (s)', autorange: 'reversed' },
-                    margin: { t: 40, l: 40, r: 40, b: 40 }
+                    margin: { t: 40, l: 40, r: 40, b: 40 },
                 };
 
                 Plotly.newPlot('plot', data, layout);
