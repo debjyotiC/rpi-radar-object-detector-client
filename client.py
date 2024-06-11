@@ -15,13 +15,12 @@ api_thread = None
 api_url = ''
 latest_data = {}
 
-radar_type = 1642
+radar_type = 2944
 
 if radar_type == 1642:
     cf = parseConfigFile("config_files/AWR1642.cfg", Rx_Ant=4, Tx_Ant=2)
 elif radar_type == 2944:
     cf = parseConfigFile("config_files/AWR2944.cfg", Rx_Ant=4, Tx_Ant=2)
-
 
 rangeArray = np.array(range(cf["numRangeBins"])) * cf["rangeIdxToMeters"]
 
@@ -67,4 +66,4 @@ def latest_data_route():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
