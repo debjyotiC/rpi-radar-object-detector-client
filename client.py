@@ -32,7 +32,7 @@ def fetch_api_data():
         data = response.json()
         data['Range_Array'] = rangeArray.tolist()
         latest_data = data
-        time.sleep(2)
+        time.sleep(1)
 
 
 @app.route('/')
