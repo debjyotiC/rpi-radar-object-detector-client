@@ -22,7 +22,7 @@ if radar_type == 1642:
 elif radar_type == 2944:
     cf = parseConfigFile("config_files/AWR2944.cfg", Rx_Ant=4, Tx_Ant=2)
 
-rangeArray = np.array(range(cf["numRangeBins"])) * cf["rangeIdxToMeters"]
+rangeArray = np.round(np.array(range(cf["numRangeBins"])) * cf["rangeIdxToMeters"], 2)
 
 
 def fetch_api_data():
@@ -30,7 +30,8 @@ def fetch_api_data():
     while fetching:
         response = requests.get(api_url)
         data = response.json()
-        data['Range_Array'] = rangeArray.tolist()
+        ticks = np.array(data['Scene_Image']).shape[1]
+        data['Range_Array'] = np.linspace(0, 5, ticks).tolist()         # data['Range_Array'] = rangeArray.tolist()
         latest_data = data
         time.sleep(1)
 

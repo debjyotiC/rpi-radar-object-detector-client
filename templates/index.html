@@ -104,7 +104,6 @@
                     contentType: 'application/json',
                     data: JSON.stringify({api_url: apiUrl}),
                     success: function(data){
-                        console.log(data);
                         fetchInterval = setInterval(fetchLatestData, 1000);
                     }
                 });
@@ -121,7 +120,6 @@
                     if (data.Scene_Image && data.Range_Array) {
                         displayImage(data.Scene_Image, data.Range_Array, data.Obj_Detected);
                     }
-                    console.log(data.Range_Array);
                     const pathClearance = data.Obj_Detected === "path not clear" ? "No" : "Yes";
                     $('#path-clearance').val(pathClearance);
                     $('#detection-flag').val(data.Obj_detection_flag);
