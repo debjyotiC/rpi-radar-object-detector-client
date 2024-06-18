@@ -24,6 +24,8 @@ elif radar_type == 2944:
 
 rangeArray = np.round(np.array(range(cf["numRangeBins"])) * cf["rangeIdxToMeters"], 2)
 
+range_max = int(rangeArray[-1])
+
 
 def fetch_api_data():
     global fetching, api_url, latest_data
@@ -31,7 +33,8 @@ def fetch_api_data():
         response = requests.get(api_url)
         data = response.json()
         ticks = np.array(data['Scene_Image']).shape[1]
-        data['Range_Array'] = np.linspace(0, 5, ticks).tolist()         # data['Range_Array'] = rangeArray.tolist()
+        # data['Range_Array'] = rangeArray.tolist()
+        data['Range_Array'] = np.linspace(0, range_max, ticks).tolist()
         latest_data = data
         time.sleep(1)
 
