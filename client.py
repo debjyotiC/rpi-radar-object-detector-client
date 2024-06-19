@@ -18,7 +18,7 @@ latest_data = {}
 radar_type = 1642
 
 if radar_type == 1642:
-    cf = parseConfigFile("config_files/AWR1642.cfg", Rx_Ant=4, Tx_Ant=2)
+    cf = parseConfigFile("config_files/2m_random.cfg", Rx_Ant=4, Tx_Ant=2)
 elif radar_type == 2944:
     cf = parseConfigFile("config_files/AWR2944.cfg", Rx_Ant=4, Tx_Ant=2)
 
