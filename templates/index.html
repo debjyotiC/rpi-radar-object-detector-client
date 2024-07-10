@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obstacle Detector</title>
+    <title>Clearance Status</title>
     <link rel="stylesheet" href="static/css/materialize.min.css">
     <link rel="stylesheet" href="static/css/material-icons.css">
     <script src="static/js/jquery-3.6.0.min.js"></script>
@@ -66,11 +66,33 @@
             font-size: 1.5em;
             font-weight: bold;
         }
+
+        .path-clearance-status {
+            display: flex;
+            align-items: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .path-clearance-status .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .path-clearance-status .status.yes {
+            background-color: #008000;
+        }
+
+        .path-clearance-status .status.no {
+            background-color: #FF0000;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">Obstacle Detector</h1>
+        <h1 class="title">Clearance Status</h1>
         <div class="input-field">
             <input type="text" id="local-ip" class="validate" placeholder="Enter local IP">
             <label for="local-ip" class="active">Radar server IP</label>
@@ -81,13 +103,13 @@
         </div>
 
         <div class="data-container">
-            <div id="plot" class="plot-container"></div>
             <div class="info-container">
-                <div class="input-field">
-                    <input type="text" id="path-clearance" readonly>
-                    <label for="path-clearance" class="active">Path Clearance</label>
+                <div class="path-clearance-status">
+                    Path Clearance:
+                    <div id="path-clearance" class="status">No</div>
                 </div>
             </div>
+            <div id="plot" class="plot-container"></div>
         </div>
     </div>
 
@@ -121,16 +143,8 @@
                         displayImage(data.Scene_Image, data.Range_Array, data.Obj_Detected);
                     }
                     const pathClearance = data.Obj_Detected === "path not clear" ? "No" : "Yes";
-                    $('#path-clearance').val(pathClearance);
-                    $('#detection-flag').val(data.Obj_detection_flag);
-
-                    if (data.Obj_Detected === "path not clear") {
-                        $('#status-flag').removeClass('green').addClass('red');
-                        $('#path-clearance').css('color', '#FF0000');
-                    } else {
-                        $('#status-flag').removeClass('red').addClass('green');
-                        $('#path-clearance').css('color', '#008000');
-                    }
+                    $('#path-clearance').text(pathClearance);
+                    $('#path-clearance').removeClass('yes no').addClass(pathClearance === "Yes" ? 'yes' : 'no');
                 });
             }
 
