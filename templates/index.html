@@ -29,7 +29,8 @@
         }
 
         .plot-container {
-            width: 80%;
+            width: 40%;  /* Reduced width */
+            height: 300px; /* Set a fixed height */
             margin-bottom: 20px;
         }
 
@@ -75,7 +76,7 @@
         }
 
         .path-clearance-status .status {
-            padding: 5px 10px;
+            padding: 5px 50px; /* Increased padding */
             border-radius: 5px;
             color: white;
             margin-left: 10px;
@@ -190,6 +191,8 @@
                     xaxis: { title: 'Range (m)' },
                     yaxis: { title: 'Doppler Frequency', autorange: 'reversed' },
                     margin: { t: 40, l: 40, r: 40, b: 40 },
+                    width: 600,  // Adjusted width
+                    height: 400  // Adjusted height
                 };
 
                 Plotly.newPlot('plot', data, layout);
